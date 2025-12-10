@@ -118,4 +118,22 @@ class BusinessController extends Controller
             ->back()
             ->with('success', "Switched to {$business->name}");
     }
+
+    /**
+     * Show team management page.
+     */
+    public function team(Business $business): View
+    {
+        $this->authorize('view', $business);
+
+        $business->load(['users', 'plan']);
+
+        $pendingInvitations = $business->invitations()
+            ->where('status', 'pending')
+            ->with('inviter')
+            ->latest()
+            ->get();
+
+        return view('businesses.team', compact('business', 'pendingInvitations'));
+    }
 }

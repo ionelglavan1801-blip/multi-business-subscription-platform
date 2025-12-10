@@ -175,9 +175,9 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-900">Team Members</h3>
-                        <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                            + Invite Member
-                        </button>
+                        <a href="{{ route('businesses.team', $business) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                            Manage Team →
+                        </a>
                     </div>
 
                     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">

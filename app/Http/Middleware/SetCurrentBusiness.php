@@ -15,6 +15,8 @@ class SetCurrentBusiness
     protected array $excludedRoutes = [
         'businesses.create',
         'businesses.store',
+        'invitations.show',
+        'invitations.accept',
         'profile.edit',
         'profile.update',
         'profile.destroy',
