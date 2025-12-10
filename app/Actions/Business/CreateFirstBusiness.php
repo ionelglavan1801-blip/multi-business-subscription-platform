@@ -14,8 +14,21 @@ class CreateFirstBusiness
      */
     public function execute(User $user, ?string $businessName = null): Business
     {
-        // Get Free plan
-        $freePlan = Plan::where('slug', 'free')->firstOrFail();
+        // Get Free plan (or first available plan)
+        $freePlan = Plan::where('slug', 'free')->first() ?? Plan::first();
+
+        // If no plan exists, create a default free plan
+        if (! $freePlan) {
+            $freePlan = Plan::create([
+                'name' => 'Free',
+                'slug' => 'free',
+                'description' => 'Free plan',
+                'price_monthly' => 0,
+                'max_businesses' => 1,
+                'max_users_per_business' => 3,
+                'max_projects' => 3,
+            ]);
+        }
 
         // Generate business name and slug
         $name = $businessName ?? "{$user->name}'s Business";

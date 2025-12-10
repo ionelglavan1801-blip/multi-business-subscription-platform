@@ -19,6 +19,8 @@ class BusinessController extends Controller
      */
     public function index(): View
     {
+        $this->authorize('viewAny', Business::class);
+
         $businesses = auth()->user()->businesses()
             ->with('plan')
             ->withPivot('role')
@@ -32,6 +34,8 @@ class BusinessController extends Controller
      */
     public function create(): View
     {
+        $this->authorize('create', Business::class);
+
         $plans = Plan::all();
 
         return view('businesses.create', compact('plans'));
@@ -42,6 +46,8 @@ class BusinessController extends Controller
      */
     public function store(StoreBusinessRequest $request, CreateBusiness $action): RedirectResponse
     {
+        $this->authorize('create', Business::class);
+
         $business = $action->execute(auth()->user(), $request->validated());
 
         return redirect()
@@ -54,6 +60,8 @@ class BusinessController extends Controller
      */
     public function show(Business $business): View
     {
+        $this->authorize('view', $business);
+
         $business->load(['plan', 'users', 'projects']);
 
         return view('businesses.show', compact('business'));
@@ -64,6 +72,8 @@ class BusinessController extends Controller
      */
     public function edit(Business $business): View
     {
+        $this->authorize('update', $business);
+
         return view('businesses.edit', compact('business'));
     }
 
@@ -72,6 +82,8 @@ class BusinessController extends Controller
      */
     public function update(UpdateBusinessRequest $request, Business $business, UpdateBusiness $action): RedirectResponse
     {
+        $this->authorize('update', $business);
+
         $action->execute($business, $request->validated());
 
         return redirect()
@@ -84,6 +96,8 @@ class BusinessController extends Controller
      */
     public function destroy(Business $business, DeleteBusiness $action): RedirectResponse
     {
+        $this->authorize('delete', $business);
+
         $action->execute($business);
 
         return redirect()
