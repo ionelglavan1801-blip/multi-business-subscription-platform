@@ -104,4 +104,18 @@ class BusinessController extends Controller
             ->route('businesses.index')
             ->with('success', 'Business deleted successfully!');
     }
+
+    /**
+     * Switch the current business context.
+     */
+    public function switch(Business $business): RedirectResponse
+    {
+        $this->authorize('view', $business);
+
+        session(['current_business_id' => $business->id]);
+
+        return redirect()
+            ->back()
+            ->with('success', "Switched to {$business->name}");
+    }
 }

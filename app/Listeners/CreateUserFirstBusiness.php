@@ -4,13 +4,9 @@ namespace App\Listeners;
 
 use App\Actions\Business\CreateFirstBusiness;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
-class CreateUserFirstBusiness implements ShouldQueue
+class CreateUserFirstBusiness
 {
-    use InteractsWithQueue;
-
     /**
      * Handle the event.
      */
