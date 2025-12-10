@@ -1,9 +1,10 @@
-version: '3.8'
-
 services:
   # Laravel Application (PHP-FPM)
   app:
-    image: php:8.2-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: multi_business_app:latest
     container_name: multi_business_app
     restart: unless-stopped
     working_dir: /var/www/html
@@ -97,7 +98,10 @@ services:
 
   # Queue Worker
   queue:
-    image: php:8.2-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: multi_business_app:latest
     container_name: multi_business_queue
     restart: unless-stopped
     working_dir: /var/www/html
