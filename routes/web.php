@@ -25,10 +25,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/businesses/{business}/invitations', [\App\Http\Controllers\InvitationController::class, 'store'])->name('businesses.invitations.store');
     Route::delete('/businesses/{business}/invitations/{invitation}', [\App\Http\Controllers\InvitationController::class, 'destroy'])->name('businesses.invitations.destroy');
     Route::post('/businesses/{business}/invitations/{invitation}/resend', [\App\Http\Controllers\InvitationController::class, 'resend'])->name('businesses.invitations.resend');
+
+    // Billing routes
+    Route::get('/businesses/{business}/billing', [\App\Http\Controllers\BillingController::class, 'index'])->name('billing.index');
+    Route::post('/businesses/{business}/billing/checkout', [\App\Http\Controllers\BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/businesses/{business}/billing/success', [\App\Http\Controllers\BillingController::class, 'success'])->name('billing.success');
+    Route::get('/businesses/{business}/billing/cancel', [\App\Http\Controllers\BillingController::class, 'cancel'])->name('billing.cancel');
+    Route::get('/businesses/{business}/billing/portal', [\App\Http\Controllers\BillingController::class, 'portal'])->name('billing.portal');
+    Route::post('/businesses/{business}/billing/cancel-subscription', [\App\Http\Controllers\BillingController::class, 'cancelSubscription'])->name('billing.cancel-subscription');
+    Route::post('/businesses/{business}/billing/resume-subscription', [\App\Http\Controllers\BillingController::class, 'resumeSubscription'])->name('billing.resume-subscription');
 });
 
 // Public invitation routes (no auth required for viewing)
 Route::get('/invitations/{token}', [\App\Http\Controllers\InvitationController::class, 'show'])->name('invitations.show');
 Route::post('/invitations/{token}/accept', [\App\Http\Controllers\InvitationController::class, 'accept'])->middleware('auth')->name('invitations.accept');
+
+// Stripe webhook (no CSRF protection)
+Route::post('/webhook/stripe', \App\Http\Controllers\StripeWebhookController::class)->name('webhook.stripe');
 
 require __DIR__.'/auth.php';
