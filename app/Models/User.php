@@ -69,4 +69,50 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Project::class, 'created_by');
     }
+
+    /**
+     * Get the user's current business from session.
+     */
+    public function currentBusiness(): ?Business
+    {
+        $businessId = session('current_business_id');
+
+        if (! $businessId) {
+            return null;
+        }
+
+        return $this->businesses()->find($businessId);
+    }
+
+    /**
+     * Check if user is owner of current business.
+     */
+    public function isOwnerOfCurrentBusiness(): bool
+    {
+        $business = $this->currentBusiness();
+
+        if (! $business) {
+            return false;
+        }
+
+        $pivot = $this->businesses()->where('business_id', $business->id)->first()?->pivot;
+
+        return $pivot && $pivot->role === 'owner';
+    }
+
+    /**
+     * Check if user is admin of current business.
+     */
+    public function isAdminOfCurrentBusiness(): bool
+    {
+        $business = $this->currentBusiness();
+
+        if (! $business) {
+            return false;
+        }
+
+        $pivot = $this->businesses()->where('business_id', $business->id)->first()?->pivot;
+
+        return $pivot && in_array($pivot->role, ['owner', 'admin']);
+    }
 }
