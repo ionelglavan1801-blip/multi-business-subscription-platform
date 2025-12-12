@@ -1,14 +1,28 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\Plan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $plans = Plan::orderBy('price_monthly')->get();
+    return view('welcome', compact('plans'));
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = auth()->user();
+    $currentBusiness = $user->currentBusiness();
+    
+    return view('dashboard', [
+        'user' => $user,
+        'currentBusiness' => $currentBusiness,
+        'businessCount' => $user->businesses()->count(),
+        'teamMemberCount' => $currentBusiness?->users()->count() ?? 0,
+        'projectCount' => $currentBusiness?->projects()->count() ?? 0,
+        'subscription' => $currentBusiness?->subscription,
+        'plan' => $currentBusiness?->plan,
+        'businesses' => $user->businesses()->with('plan')->latest()->take(5)->get(),
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
