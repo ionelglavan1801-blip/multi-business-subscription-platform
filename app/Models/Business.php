@@ -58,4 +58,88 @@ class Business extends Model
         return $this->hasOne(Subscription::class)
             ->where('status', 'active');
     }
+
+    /**
+     * Check if the business can add more projects based on plan limits.
+     */
+    public function canAddMoreProjects(): bool
+    {
+        $maxProjects = $this->plan?->max_projects;
+
+        if ($maxProjects === null) {
+            return true;
+        }
+
+        return $this->projects()->count() < $maxProjects;
+    }
+
+    /**
+     * Check if the business can add more users based on plan limits.
+     */
+    public function canAddMoreUsers(): bool
+    {
+        $maxUsers = $this->plan?->max_users_per_business;
+
+        if ($maxUsers === null) {
+            return true;
+        }
+
+        return $this->users()->count() < $maxUsers;
+    }
+
+    /**
+     * Get the projects usage percentage.
+     */
+    public function projectsUsagePercentage(): int
+    {
+        $maxProjects = $this->plan?->max_projects;
+
+        if ($maxProjects === null || $maxProjects === 0) {
+            return 0;
+        }
+
+        return (int) min(100, ($this->projects()->count() / $maxProjects) * 100);
+    }
+
+    /**
+     * Get the users usage percentage.
+     */
+    public function usersUsagePercentage(): int
+    {
+        $maxUsers = $this->plan?->max_users_per_business;
+
+        if ($maxUsers === null || $maxUsers === 0) {
+            return 0;
+        }
+
+        return (int) min(100, ($this->users()->count() / $maxUsers) * 100);
+    }
+
+    /**
+     * Get remaining project slots.
+     */
+    public function remainingProjectSlots(): ?int
+    {
+        $maxProjects = $this->plan?->max_projects;
+
+        if ($maxProjects === null) {
+            return null;
+        }
+
+        return max(0, $maxProjects - $this->projects()->count());
+    }
+
+    /**
+     * Get remaining user slots.
+     */
+    public function remainingUserSlots(): ?int
+    {
+        $maxUsers = $this->plan?->max_users_per_business;
+
+        if ($maxUsers === null) {
+            return null;
+        }
+
+        return max(0, $maxUsers - $this->users()->count());
+    }
 }
