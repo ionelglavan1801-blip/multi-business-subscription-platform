@@ -29,6 +29,9 @@ services:
       - MAIL_MAILER=${MAIL_MAILER}
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_PORT=${MAIL_PORT}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
+      - RESEND_API_KEY=${RESEND_API_KEY}
       - STRIPE_KEY=${STRIPE_KEY}
       - STRIPE_SECRET=${STRIPE_SECRET}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
@@ -109,6 +112,7 @@ services:
       - .:/var/www/html
     environment:
       - APP_ENV=${APP_ENV}
+      - APP_URL=${APP_URL}
       - DB_CONNECTION=${DB_CONNECTION}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -119,6 +123,10 @@ services:
       - QUEUE_CONNECTION=${QUEUE_CONNECTION}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - MAIL_MAILER=${MAIL_MAILER}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     command: php artisan queue:work --verbose --tries=3 --timeout=90 --sleep=3
     depends_on:
       mysql:
