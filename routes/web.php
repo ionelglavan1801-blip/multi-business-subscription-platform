@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $plans = Plan::orderBy('price_monthly')->get();
+
     return view('welcome', compact('plans'));
 });
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
     $currentBusiness = $user->currentBusiness();
-    
+
     return view('dashboard', [
         'user' => $user,
         'currentBusiness' => $currentBusiness,
@@ -34,6 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('businesses', \App\Http\Controllers\BusinessController::class);
     Route::post('/businesses/{business}/switch', [\App\Http\Controllers\BusinessController::class, 'switch'])->name('businesses.switch');
     Route::get('/businesses/{business}/team', [\App\Http\Controllers\BusinessController::class, 'team'])->name('businesses.team');
+
+    // Project routes (nested under businesses)
+    Route::resource('businesses.projects', \App\Http\Controllers\ProjectController::class);
 
     // Invitation routes (within business context)
     Route::post('/businesses/{business}/invitations', [\App\Http\Controllers\InvitationController::class, 'store'])->name('businesses.invitations.store');
