@@ -98,7 +98,7 @@ class BusinessController extends Controller
     {
         $this->authorize('delete', $business);
 
-        $action->execute($business);
+        $action->execute($business, auth()->user());
 
         return redirect()
             ->route('businesses.index')

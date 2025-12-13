@@ -6,6 +6,9 @@ use App\Models\Business;
 use App\Models\Plan;
 use App\Models\StripeWebhookLog;
 use App\Models\Subscription;
+use App\Notifications\PaymentFailed;
+use App\Notifications\SubscriptionActivated;
+use App\Notifications\SubscriptionCancelled;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -116,6 +119,12 @@ class HandleStripeWebhook
         // Update business plan
         $business->update(['plan_id' => $plan->id]);
 
+        // Notify business owner
+        $owner = $business->owner();
+        if ($owner) {
+            $owner->notify(new SubscriptionActivated($business, $plan));
+        }
+
         Log::info('Subscription created', [
             'business_id' => $businessId,
             'subscription_id' => $data['id'],
@@ -155,6 +164,9 @@ class HandleStripeWebhook
             return;
         }
 
+        $business = $subscription->business;
+        $previousPlanName = $subscription->plan?->name;
+
         $subscription->update([
             'status' => 'cancelled',
             'ends_at' => now(),
@@ -163,7 +175,13 @@ class HandleStripeWebhook
         // Revert to free plan
         $freePlan = Plan::where('slug', 'free')->first();
         if ($freePlan) {
-            $subscription->business->update(['plan_id' => $freePlan->id]);
+            $business->update(['plan_id' => $freePlan->id]);
+        }
+
+        // Notify business owner
+        $owner = $business->owner();
+        if ($owner) {
+            $owner->notify(new SubscriptionCancelled($business, $previousPlanName));
         }
 
         Log::info('Subscription deleted', [
@@ -214,6 +232,11 @@ class HandleStripeWebhook
             'business_id' => $subscription->business_id,
         ]);
 
-        // TODO: Send notification to business owner
+        // Notify business owner
+        $owner = $subscription->business->owner();
+        if ($owner) {
+            $amountCents = $data['amount_due'] ?? null;
+            $owner->notify(new PaymentFailed($subscription->business, $amountCents));
+        }
     }
 }
