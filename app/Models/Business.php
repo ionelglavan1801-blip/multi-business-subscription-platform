@@ -33,6 +33,14 @@ class Business extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Get the owner of the business.
+     */
+    public function owner(): ?User
+    {
+        return $this->users()->wherePivot('role', 'owner')->first();
+    }
+
     public function subscription(): HasOne
     {
         return $this->hasOne(Subscription::class);
