@@ -31,9 +31,26 @@ jobs:
             
             echo "📥 Pulling latest code from GitHub..."
             git pull origin main
+                        echo "🐳 Rebuilding Docker containers..."
+            docker-compose build --no-cache app
+            docker-compose up -d app
+                        echo "� Installing composer dependencies..."
+            docker-compose exec -T app composer install --no-interaction --prefer-dist --optimize-autoloader
             
-            echo "🔄 Restarting Docker containers..."
-            docker-compose restart
+            echo "🎨 Building frontend assets..."
+            docker-compose exec -T app npm install
+            docker-compose exec -T app npm run build
+            
+            echo "🗄️ Running migrations..."
+            docker-compose exec -T app php artisan migrate --force
+            
+            echo "🧹 Clearing caches..."
+            docker-compose exec -T app php artisan config:cache
+            docker-compose exec -T app php artisan route:cache
+            docker-compose exec -T app php artisan view:cache
+            
+            echo "🔄 Restarting queue worker..."
+            docker-compose restart queue
             
             echo "✅ Deployment completed!"
           ENDSSH
