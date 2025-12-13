@@ -34,11 +34,22 @@ class Business extends Model
     }
 
     /**
-     * Get the owner of the business.
+     * Get the owner of the business (as a relationship).
      */
-    public function owner(): ?User
+    public function owners(): BelongsToMany
     {
-        return $this->users()->wherePivot('role', 'owner')->first();
+        return $this->belongsToMany(User::class)
+            ->withPivot('role')
+            ->withTimestamps()
+            ->wherePivot('role', 'owner');
+    }
+
+    /**
+     * Get the owner user directly.
+     */
+    public function getOwnerAttribute(): ?User
+    {
+        return $this->owners()->first();
     }
 
     public function subscription(): HasOne
