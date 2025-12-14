@@ -1,59 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Multi-Business Subscription Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A SaaS platform built with Laravel 12 that allows users to manage multiple businesses with team collaboration, subscription billing, and project management.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Multi-Business Management** - Users can create and manage multiple businesses
+- **Team Collaboration** - Invite team members via email with role-based access (owner, admin, member)
+- **Subscription Billing** - Stripe integration with multiple plans (Free, Pro, Enterprise)
+- **Project Management** - Create and manage projects per business
+- **Plan Limits** - Enforced limits on businesses, team members, and projects per plan
+- **Email Notifications** - Subscription activations, cancellations, payment failures
+- **Webhook Handling** - Robust Stripe webhook processing
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend:** Laravel 12, PHP 8.2
+- **Database:** MySQL 8.0
+- **Cache/Queue:** Redis
+- **Payments:** Stripe (Checkout, Webhooks, Customer Portal)
+- **Email:** Resend (transactional emails)
+- **Frontend:** Blade, Tailwind CSS
+- **Infrastructure:** Docker, Nginx, Cloudflare Tunnel
 
-## Learning Laravel
+## Architecture
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```
+app/
+├── Actions/           # Single-purpose action classes
+│   ├── Billing/       # Stripe checkout, webhook handling
+│   └── Business/      # Business creation, invitation logic
+├── Http/
+│   ├── Controllers/   # Thin controllers
+│   ├── Middleware/    # Custom middleware
+│   └── Requests/      # Form request validation
+├── Models/            # Eloquent models with relationships
+├── Notifications/     # Email notifications
+├── Policies/          # Authorization policies
+└── Services/          # External service integrations
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Database Schema
 
-## Laravel Sponsors
+- **Users** - Authentication, profile management
+- **Businesses** - Multi-tenant business entities
+- **Plans** - Subscription tiers with limits
+- **Subscriptions** - Stripe subscription tracking
+- **Invitations** - Team member invitations
+- **Projects** - Business projects
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Getting Started
 
-### Premium Partners
+### Prerequisites
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Docker & Docker Compose
+- PHP 8.2+
+- Composer
+- Node.js 18+
 
-## Contributing
+### Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# Clone repository
+git clone https://github.com/ionelglavan1801-blip/multi-business-subscription-platform.git
+cd multi-business-subscription-platform
 
-## Code of Conduct
+# Copy environment file
+cp .env.example .env
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Start Docker containers
+docker compose up -d
 
-## Security Vulnerabilities
+# Install dependencies
+docker compose exec app composer install
+docker compose exec app npm install && npm run build
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Setup application
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+```
+
+### Environment Variables
+
+```env
+# Stripe
+STRIPE_KEY=pk_test_xxx
+STRIPE_SECRET=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_PRICE_PRO=price_xxx
+STRIPE_PRICE_ENTERPRISE=price_xxx
+
+# Email (Resend)
+MAIL_MAILER=resend
+RESEND_API_KEY=re_xxx
+MAIL_FROM_ADDRESS=noreply@yourdomain.com
+```
+
+## Testing
+
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test suite
+php artisan test --filter=Business
+php artisan test --filter=Invitation
+```
+
+**111 tests passing** covering authentication, business management, invitations, and billing flows.
+
+## Subscription Plans
+
+| Plan | Price | Businesses | Team Members | Projects |
+|------|-------|------------|--------------|----------|
+| Free | $0/mo | 1 | 3 | 3 |
+| Pro | $29/mo | 5 | 10 | 50 |
+| Enterprise | $99/mo | Unlimited | Unlimited | Unlimited |
+
+## Live Demo
+
+https://multi-business-subscription-platform.ionglavan.com
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT License
