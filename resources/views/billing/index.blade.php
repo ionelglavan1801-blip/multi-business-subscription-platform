@@ -72,7 +72,7 @@
                                     <p class="text-sm text-gray-600 mt-2">
                                         Cancels on {{ $business->activeSubscription->ends_at->format('M d, Y') }}
                                     </p>
-                                @else
+                                @elseif($business->activeSubscription->current_period_end)
                                     <p class="text-sm text-gray-600 mt-2">
                                         Renews on {{ $business->activeSubscription->current_period_end->format('M d, Y') }}
                                     </p>
