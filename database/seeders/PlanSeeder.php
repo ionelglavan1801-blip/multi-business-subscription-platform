@@ -45,11 +45,18 @@ class PlanSeeder extends Seeder
             ],
         ];
 
-        foreach ($plans as $plan) {
-            Plan::updateOrCreate(
-                ['slug' => $plan['slug']],
-                $plan
-            );
+        foreach ($plans as $planData) {
+            $existing = Plan::where('slug', $planData['slug'])->first();
+
+            if ($existing) {
+                // Don't overwrite stripe_price_id if env is empty and DB has a value
+                if (empty($planData['stripe_price_id']) && ! empty($existing->stripe_price_id)) {
+                    unset($planData['stripe_price_id']);
+                }
+                $existing->update($planData);
+            } else {
+                Plan::create($planData);
+            }
         }
     }
 }
