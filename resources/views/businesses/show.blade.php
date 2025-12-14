@@ -67,7 +67,7 @@
                             <dt class="text-sm font-medium text-gray-500">Plan</dt>
                             <dd class="mt-1">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-{{ $business->plan->slug === 'free' ? 'gray' : ($business->plan->slug === 'pro' ? 'blue' : 'purple') }}-100 text-{{ $business->plan->slug === 'free' ? 'gray' : ($business->plan->slug === 'pro' ? 'blue' : 'purple') }}-800">
-                                    {{ $business->plan->name }} - ${{ number_format($business->plan->price, 2) }}/mo
+                                    {{ $business->plan->name }} - ${{ number_format($business->plan->price_monthly / 100, 2) }}/mo
                                 </span>
                             </dd>
                         </div>
@@ -113,7 +113,7 @@
                                             {{ $business->users->count() }}
                                         </div>
                                         <div class="ml-2 text-sm text-gray-500">
-                                            / {{ $business->plan->max_users_per_business === -1 ? '∞' : $business->plan->max_users_per_business }}
+                                            / {{ $business->plan->max_users_per_business === null ? '∞' : $business->plan->max_users_per_business }}
                                         </div>
                                     </dd>
                                 </dl>
@@ -139,7 +139,7 @@
                                             {{ $business->projects->count() }}
                                         </div>
                                         <div class="ml-2 text-sm text-gray-500">
-                                            / {{ $business->plan->max_projects === -1 ? '∞' : $business->plan->max_projects }}
+                                            / {{ $business->plan->max_projects === null ? '∞' : $business->plan->max_projects }}
                                         </div>
                                     </dd>
                                 </dl>
