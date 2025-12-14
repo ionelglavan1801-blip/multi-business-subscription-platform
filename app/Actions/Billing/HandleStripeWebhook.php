@@ -105,14 +105,18 @@ class HandleStripeWebhook
             return;
         }
 
+        // Extract period dates from subscription items (new Stripe API structure)
+        $periodStart = $this->extractPeriodStart($data);
+        $periodEnd = $this->extractPeriodEnd($data);
+
         Subscription::create([
             'business_id' => $business->id,
             'plan_id' => $plan->id,
             'stripe_customer_id' => $data['customer'],
             'stripe_subscription_id' => $data['id'],
             'status' => $data['status'],
-            'current_period_start' => Carbon::createFromTimestamp($data['current_period_start']),
-            'current_period_end' => Carbon::createFromTimestamp($data['current_period_end']),
+            'current_period_start' => $periodStart,
+            'current_period_end' => $periodEnd,
             'trial_ends_at' => isset($data['trial_end']) ? Carbon::createFromTimestamp($data['trial_end']) : null,
         ]);
 
@@ -120,7 +124,7 @@ class HandleStripeWebhook
         $business->update(['plan_id' => $plan->id]);
 
         // Notify business owner
-        $owner = $business->owner();
+        $owner = $business->owner;
         if ($owner) {
             $owner->notify(new SubscriptionActivated($business, $plan));
         }
@@ -141,12 +145,16 @@ class HandleStripeWebhook
             return;
         }
 
+        // Extract period dates from subscription items (new Stripe API structure)
+        $periodStart = $this->extractPeriodStart($data);
+        $periodEnd = $this->extractPeriodEnd($data);
+
         $subscription->update([
             'status' => $data['status'],
-            'current_period_start' => Carbon::createFromTimestamp($data['current_period_start']),
-            'current_period_end' => Carbon::createFromTimestamp($data['current_period_end']),
+            'current_period_start' => $periodStart,
+            'current_period_end' => $periodEnd,
             'ends_at' => $data['cancel_at_period_end']
-                ? Carbon::createFromTimestamp($data['current_period_end'])
+                ? $periodEnd
                 : null,
         ]);
 
@@ -179,7 +187,7 @@ class HandleStripeWebhook
         }
 
         // Notify business owner
-        $owner = $business->owner();
+        $owner = $business->owner;
         if ($owner) {
             $owner->notify(new SubscriptionCancelled($business, $previousPlanName));
         }
@@ -233,10 +241,50 @@ class HandleStripeWebhook
         ]);
 
         // Notify business owner
-        $owner = $subscription->business->owner();
+        $owner = $subscription->business->owner;
         if ($owner) {
             $amountCents = $data['amount_due'] ?? null;
             $owner->notify(new PaymentFailed($subscription->business, $amountCents));
         }
+    }
+
+    /**
+     * Extract period start from subscription data (handles new Stripe API structure).
+     */
+    protected function extractPeriodStart(array $data): Carbon
+    {
+        // Try new API structure: items.data[0].current_period_start
+        if (isset($data['items']['data'][0]['current_period_start'])) {
+            return Carbon::createFromTimestamp($data['items']['data'][0]['current_period_start']);
+        }
+
+        // Fallback to old structure
+        if (isset($data['current_period_start'])) {
+            return Carbon::createFromTimestamp($data['current_period_start']);
+        }
+
+        // Default to start_date or now
+        return isset($data['start_date'])
+            ? Carbon::createFromTimestamp($data['start_date'])
+            : now();
+    }
+
+    /**
+     * Extract period end from subscription data (handles new Stripe API structure).
+     */
+    protected function extractPeriodEnd(array $data): Carbon
+    {
+        // Try new API structure: items.data[0].current_period_end
+        if (isset($data['items']['data'][0]['current_period_end'])) {
+            return Carbon::createFromTimestamp($data['items']['data'][0]['current_period_end']);
+        }
+
+        // Fallback to old structure
+        if (isset($data['current_period_end'])) {
+            return Carbon::createFromTimestamp($data['current_period_end']);
+        }
+
+        // Default to 30 days from now
+        return now()->addDays(30);
     }
 }
